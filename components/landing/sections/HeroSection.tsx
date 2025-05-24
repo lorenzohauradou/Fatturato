@@ -67,7 +67,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               <span className="bg-none text-slate-800">Massimizza i Guadagni</span>
             </h1>
             <p className="text-lg sm:text-xl text-slate-600 mb-8 max-w-2xl leading-relaxed">
-              <strong>Importa un PDF</strong> del lavoro per il <strong>tuo cliente</strong> ottieni: il <strong>preventivo</strong> da offrirgli, <strong>piano d'azione, tasks e budget.</strong><br /><br />Mantieni il controllo di tutte le <strong>tue attività</strong> in un <strong>unico posto</strong> dove tutto avviene in maniera <strong>automatica!</strong>
+              <strong>Importa un PDF</strong> del lavoro per il <strong>tuo cliente</strong>e ottieni: il <strong>preventivo</strong> da offrirgli, <strong>piano d'azione, tasks e budget.</strong><br /><br />Mantieni il controllo di tutte le <strong>tue attività</strong> in un <strong>unico posto</strong> dove tutto avviene in maniera <strong>automatica!</strong>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Button
