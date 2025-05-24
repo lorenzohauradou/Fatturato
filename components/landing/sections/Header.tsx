@@ -65,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({ navLinks, scrollToSection }) => {
             </Button>
             <Button
               className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md hover:shadow-lg transition-all ml-2 group"
-              onClick={() => scrollToSection("cta-section")}
+              onClick={() => window.location.href = "/"}
             >
               Inizia Gratis <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
@@ -116,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({ navLinks, scrollToSection }) => {
             <Button
               className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md hover:shadow-lg transition-all w-full py-3 mt-2 group"
               onClick={() => {
-                scrollToSection("cta-section")
+                window.location.href = "/"
                 setIsMobileMenuOpen(false)
               }}
             >

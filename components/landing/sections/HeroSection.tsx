@@ -73,7 +73,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-600 text-white px-8 py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all group font-semibold"
-                onClick={() => scrollToSection("pricing")}
+                onClick={() => window.location.href = "/"}
               >
                 <Rocket className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                 Inizia la Prova Gratuita
