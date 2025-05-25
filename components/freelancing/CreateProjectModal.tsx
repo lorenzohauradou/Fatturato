@@ -30,12 +30,12 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
   })
   const [totalBudget, setTotalBudget] = useState<number>(300) // Sempre intero
   const [budgetInputValue, setBudgetInputValue] = useState<string>(Math.round(totalBudget).toString())
-  
+
   const defaultTasks: Task[] = [
     { id: "1", name: "Pianificazione iniziale", price: 150, hours: 5 },
     { id: "2", name: "Sviluppo principale", price: 150, hours: 10 },
   ].map(task => ({ ...task, price: Math.round(task.price) }));
-  
+
   const [tasks, setTasks] = useState<Task[]>(defaultTasks)
   const [newTask, setNewTask] = useState({ name: "", price: "", hours: "" }) // price e hours sono stringhe per input
 
@@ -85,7 +85,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
 
     const basePrice = Math.floor(roundedBudget / currentTasks.length);
     let remainder = roundedBudget % currentTasks.length;
-    
+
     const distributedTasks = currentTasks.map((task) => {
       let price = basePrice;
       if (remainder > 0) {
@@ -98,9 +98,9 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
     // Correzione finale per assicurare che la somma sia esatta
     const sumOfTasks = distributedTasks.reduce((acc, curr) => acc + curr.price, 0);
     if (sumOfTasks !== roundedBudget && distributedTasks.length > 0) {
-        const difference = roundedBudget - sumOfTasks;
-        distributedTasks[distributedTasks.length -1].price += difference;
-        distributedTasks[distributedTasks.length -1].price = Math.round( distributedTasks[distributedTasks.length -1].price);
+      const difference = roundedBudget - sumOfTasks;
+      distributedTasks[distributedTasks.length - 1].price += difference;
+      distributedTasks[distributedTasks.length - 1].price = Math.round(distributedTasks[distributedTasks.length - 1].price);
     }
     return distributedTasks;
   }
@@ -111,7 +111,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
       setTotalBudget(roundedInitialBudget); // Assicura che totalBudget sia intero all'apertura
       setBudgetInputValue(roundedInitialBudget.toString());
       // Clona defaultTasks per evitare mutazioni se sono usati altrove o per resettare
-      const initialTasks = defaultTasks.map(t => ({...t})); 
+      const initialTasks = defaultTasks.map(t => ({ ...t }));
       const redistributed = redistributeTasks(roundedInitialBudget, initialTasks);
       setTasks(redistributed);
     }
@@ -134,18 +134,18 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
         price: newTaskPrice,
         hours: newTaskHours,
       };
-      
+
       let currentTotalBudget = Math.round(totalBudget);
       let updatedTasksList = [newTaskObj, ...tasks];
-      
+
       if (newTaskPrice === 0 && currentTotalBudget > 0) { // Se il nuovo task non ha prezzo e c'è un budget, redistribuisci
         updatedTasksList = redistributeTasks(currentTotalBudget, updatedTasksList);
       } else { // Altrimenti, il nuovo task ha un prezzo, quindi aggiorna il budget totale dalla somma dei task
-         const newTotalFromTasks = updatedTasksList.reduce((sum, task) => sum + task.price, 0);
-         currentTotalBudget = Math.round(newTotalFromTasks);
-         // Non è necessario redistribuire se il task ha un prezzo, basta aggiornare il totale.
+        const newTotalFromTasks = updatedTasksList.reduce((sum, task) => sum + task.price, 0);
+        currentTotalBudget = Math.round(newTotalFromTasks);
+        // Non è necessario redistribuire se il task ha un prezzo, basta aggiornare il totale.
       }
-      
+
       setTasks(updatedTasksList);
       setTotalBudget(currentTotalBudget); // Aggiorna totalBudget
       setBudgetInputValue(currentTotalBudget.toString()); // E il suo input field
@@ -170,7 +170,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
 
   const updateTaskPrice = (taskId: string, newPriceString: string) => {
     const newPrice = Math.round(Number.parseFloat(newPriceString) || 0);
-    const updatedTasks = tasks.map(task => 
+    const updatedTasks = tasks.map(task =>
       task.id === taskId ? { ...task, price: newPrice } : task
     );
     setTasks(updatedTasks);
@@ -208,14 +208,14 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
   const handleBudgetInputBlur = () => {
     let finalNumericBudget: number;
     if (budgetInputValue === "" || budgetInputValue === "-") {
-        finalNumericBudget = 0;
+      finalNumericBudget = 0;
     } else {
-        finalNumericBudget = Number.parseFloat(budgetInputValue);
-        if (isNaN(finalNumericBudget) || finalNumericBudget < 0) {
-            finalNumericBudget = 0; // Default a 0 se invalido
-        }
+      finalNumericBudget = Number.parseFloat(budgetInputValue);
+      if (isNaN(finalNumericBudget) || finalNumericBudget < 0) {
+        finalNumericBudget = 0; // Default a 0 se invalido
+      }
     }
-    
+
     const roundedBudget = Math.round(finalNumericBudget);
     setTotalBudget(roundedBudget);
     setBudgetInputValue(roundedBudget.toString());
@@ -225,8 +225,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
       // Assicurati che totalBudget sia la somma esatta dei task dopo la ridistribuzione finale
       const sumOfRedistributed = redistributed.reduce((acc, task) => acc + task.price, 0);
       if (sumOfRedistributed !== roundedBudget) {
-          setTotalBudget(sumOfRedistributed);
-          setBudgetInputValue(sumOfRedistributed.toString());
+        setTotalBudget(sumOfRedistributed);
+        setBudgetInputValue(sumOfRedistributed.toString());
       }
     }
   };
@@ -273,7 +273,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
     if (sumOfFinalTasks !== finalBudget && finalTasks.length > 0) {
       budgetToSubmit = sumOfFinalTasks;
     } else if (finalTasks.length === 0) {
-        budgetToSubmit = 0; // Se non ci sono task, il budget è 0
+      budgetToSubmit = 0; // Se non ci sono task, il budget è 0
     }
 
 
@@ -288,7 +288,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
     setFormData({ title: "", client: "", description: "" });
     setTotalBudget(defaultResetBudget);
     setBudgetInputValue(defaultResetBudget.toString());
-    const resetTasksArray = defaultTasks.map(t => ({...t})); // Crea una nuova copia per il reset
+    const resetTasksArray = defaultTasks.map(t => ({ ...t })); // Crea una nuova copia per il reset
     setTasks(redistributeTasks(defaultResetBudget, resetTasksArray));
     setNewTask({ name: "", price: "", hours: "" });
   }
@@ -378,14 +378,14 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
       const roundedBudget = Math.round(mockAIData.budget);
       setTotalBudget(roundedBudget);
       setBudgetInputValue(roundedBudget.toString());
-      setTasks(mockAIData.tasks.map(t => ({...t, price: Math.round(t.price), hours: Math.round(t.hours || 0) })));
+      setTasks(mockAIData.tasks.map(t => ({ ...t, price: Math.round(t.price), hours: Math.round(t.hours || 0) })));
 
       // 3. Opzionale: resetta gli input AI dopo l'elaborazione
       // setPdfFile(null);
       // setAudioFile(null);
       // setPastedText(""); 
       // --> Li resettiamo già in handleSubmit dopo la chiamata a handleAISubmit
-      
+
       // Feedback positivo all'utente
       // const showSuccessToast = () => { /* ... implementa toast di successo ... */ };
       // showSuccessToast();
@@ -409,7 +409,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
       // showErrorToast(error.message);
     }
   };
-   // ----------------------------------------------------
+  // ----------------------------------------------------
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) { // Quando il modal si chiude
@@ -419,7 +419,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
         setFormData({ title: "", client: "", description: "" });
         setTotalBudget(defaultResetBudget);
         setBudgetInputValue(defaultResetBudget.toString());
-        const resetTasksArray = defaultTasks.map(t => ({...t}));
+        const resetTasksArray = defaultTasks.map(t => ({ ...t }));
         setTasks(redistributeTasks(defaultResetBudget, resetTasksArray));
         setNewTask({ name: "", price: "", hours: "" });
       } else {
@@ -443,18 +443,18 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
             </Button>
 
             <motion.div
-              animate={shouldAnimateButton ? { 
+              animate={shouldAnimateButton ? {
                 scale: [1, 1.08, 0.95, 1.05, 0.98, 1],
-                rotate: [0, -2, 2, -2, 2, 0] 
+                rotate: [0, -2, 2, -2, 2, 0]
               } : {
-                scale: 1, 
+                scale: 1,
                 rotate: 0
               }}
-              transition={shouldAnimateButton ? { 
-                duration: 0.8, 
+              transition={shouldAnimateButton ? {
+                duration: 0.8,
                 ease: "easeInOut",
-              } : { 
-                duration: 0.1 
+              } : {
+                duration: 0.1
               }}
             >
               <Button
@@ -485,10 +485,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
               {/* Opzione PDF */}
-              <div 
+              <div
                 className={`flex flex-col items-center justify-center h-32 sm:h-36 p-3 rounded-lg border-2 border-dashed transition-all 
-                            ${isPdfInputDisabled ? 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed' : 
-                             isDraggingPdf ? 'border-purple-500 bg-purple-100/80 cursor-copy' : 'border-purple-300 bg-purple-50/50 hover:bg-purple-100/70 hover:border-purple-400 cursor-pointer'}`}
+                            ${isPdfInputDisabled ? 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed' :
+                    isDraggingPdf ? 'border-purple-500 bg-purple-100/80 cursor-copy' : 'border-purple-300 bg-purple-50/50 hover:bg-purple-100/70 hover:border-purple-400 cursor-pointer'}`}
                 onClick={() => !isPdfInputDisabled && pdfInputRef.current?.click()}
                 onDrop={!isPdfInputDisabled ? handlePdfDrop : undefined}
                 onDragOver={!isPdfInputDisabled ? handlePdfDragOver : undefined}
@@ -501,7 +501,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
                 </span>
                 {pdfFile && !isPdfInputDisabled && (
                   // Rimosso il pulsante Analizza, resta solo Rimuovi
-                  <Button size="sm" variant="link" className="text-purple-500 h-auto p-0 mt-1 text-xs" onClick={(e) => { e.stopPropagation(); setPdfFile(null); if(pdfInputRef.current) pdfInputRef.current.value = '';}}>
+                  <Button size="sm" variant="link" className="text-purple-500 h-auto p-0 mt-1 text-xs" onClick={(e) => { e.stopPropagation(); setPdfFile(null); if (pdfInputRef.current) pdfInputRef.current.value = ''; }}>
                     Rimuovi
                   </Button>
                 )}
@@ -510,10 +510,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
               {/* Opzione Audio */}
               <div className={`flex flex-col items-center justify-start h-32 sm:h-36 p-3 rounded-lg border-2 border-dashed transition-all space-y-2 
                             ${isAudioInputDisabled ? 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed' : 'border-purple-300 bg-purple-50/50'}`}>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className={`text-purple-600 border-purple-300 hover:bg-purple-100 rounded-full w-12 h-12 sm:w-14 sm:h-14 mt-1 ${isAudioInputDisabled ? '!cursor-not-allowed !bg-gray-200 !text-gray-400 !border-gray-300' : ''}`} 
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={`text-purple-600 border-purple-300 hover:bg-purple-100 rounded-full w-12 h-12 sm:w-14 sm:h-14 mt-1 ${isAudioInputDisabled ? '!cursor-not-allowed !bg-gray-200 !text-gray-400 !border-gray-300' : ''}`}
                   onClick={() => !isAudioInputDisabled && console.log('Registra audio clicked')}
                   disabled={isAudioInputDisabled}
                 >
@@ -522,7 +522,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
                 <span className={`text-xs pt-0 ${isAudioInputDisabled ? 'text-gray-500' : 'text-purple-700'}`}>Registra</span>
 
                 <div className="w-full pt-1">
-                  <Button variant="outline" size="sm" className={`w-full ${isAudioInputDisabled ? '!cursor-not-allowed !bg-gray-200 !text-gray-400 !border-gray-300' : 'text-purple-600 border-purple-300 hover:bg-purple-100'}`} 
+                  <Button variant="outline" size="sm" className={`w-full ${isAudioInputDisabled ? '!cursor-not-allowed !bg-gray-200 !text-gray-400 !border-gray-300' : 'text-purple-600 border-purple-300 hover:bg-purple-100'}`}
                     onClick={() => !isAudioInputDisabled && audioInputRef.current?.click()}
                     disabled={isAudioInputDisabled}
                   >
@@ -530,14 +530,14 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
                   </Button>
                   <input type="file" ref={audioInputRef} onChange={handleAudioFileChange} accept="audio/*" className="hidden" disabled={isAudioInputDisabled} />
                 </div>
-                
+
                 {audioFile && !isAudioInputDisabled && (
                   <div className="flex flex-col items-center w-full">
                     {/* Rimosso il pulsante Analizza */}
                     <span className="text-xs text-center text-green-600 truncate w-full px-1" title={audioFile.name}>
                       {audioFile.name.length > 18 ? "Audio Caricato" : audioFile.name}
                     </span>
-                    <Button size="sm" variant="link" className="text-purple-500 h-auto p-0 text-xs" onClick={(e) => { e.stopPropagation(); setAudioFile(null); if(audioInputRef.current) audioInputRef.current.value = '';}}>
+                    <Button size="sm" variant="link" className="text-purple-500 h-auto p-0 text-xs" onClick={(e) => { e.stopPropagation(); setAudioFile(null); if (audioInputRef.current) audioInputRef.current.value = ''; }}>
                       Rimuovi
                     </Button>
                   </div>
@@ -548,23 +548,23 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
               <div className={`flex flex-col h-32 sm:h-36 p-3 rounded-lg border-2 border-dashed transition-all 
                             ${isTextInputDisabled ? 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed' : 'border-purple-300 bg-purple-50/50'}`}>
                 <ClipboardPaste className={`w-7 h-7 sm:w-8 sm:h-8 mb-1.5 self-center ${pastedText ? 'text-green-500' : isTextInputDisabled ? 'text-gray-400' : 'text-purple-600'}`} />
-                <Textarea 
-                  placeholder="Incolla il testo qui..." 
-                  className={`flex-grow text-xs resize-none h-16 sm:h-20 ${isTextInputDisabled ? 'bg-gray-200 border-gray-300 placeholder:text-gray-400' : 'bg-white/70 border-purple-200 focus:border-purple-400'}`} 
+                <Textarea
+                  placeholder="Incolla il testo qui..."
+                  className={`flex-grow text-xs resize-none h-16 sm:h-20 ${isTextInputDisabled ? 'bg-gray-200 border-gray-300 placeholder:text-gray-400' : 'bg-white/70 border-purple-200 focus:border-purple-400'}`}
                   value={pastedText}
                   onChange={(e) => !isTextInputDisabled && setPastedText(e.target.value)}
                   disabled={isTextInputDisabled}
                 />
                 {pastedText && !isTextInputDisabled && (
-                    // Rimosso il pulsante Analizza, l'analisi avverrà con "Crea Progetto"
-                    <Button 
-                        variant="link" 
-                        size="sm" 
-                        className="mt-2 w-full text-purple-500 h-auto p-0 text-xs"
-                        onClick={() => setPastedText('')}
-                    >
-                        Cancella Testo
-                    </Button>
+                  // Rimosso il pulsante Analizza, l'analisi avverrà con "Crea Progetto"
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="mt-2 w-full text-purple-500 h-auto p-0 text-xs"
+                    onClick={() => setPastedText('')}
+                  >
+                    Cancella Testo
+                  </Button>
                 )}
               </div>
             </div>
@@ -680,8 +680,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
                     className="pl-7"
                   />
                 </div>
-                <Button 
-                  onClick={addTask} 
+                <Button
+                  onClick={addTask}
                   className="md:col-span-1 border border-blue-500 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:border-blue-600 flex items-center justify-center space-x-2 w-full py-2.5 rounded-md transition-colors duration-150"
                   type="button"
                 >
@@ -733,7 +733,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
               </AnimatePresence>
 
               {tasks.length > 0 && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="mt-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200"
