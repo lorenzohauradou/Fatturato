@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Brain, Check, PlayCircle, Rocket, Play, FileText, Target } from "lucide-react"
+import { Brain, Check, PlayCircle, Rocket, Play, FileText, Target, CheckCircle } from "lucide-react"
 
 interface HeroSectionProps {
   heroWord: "soldi" | "tempo"
@@ -66,8 +66,29 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               <br className="hidden sm:block" />
               <span className="bg-none text-slate-800">Massimizza i Guadagni</span>
             </h1>
+            <p className="text-lg sm:text-xl text-slate-600 mb-2 max-w-2xl leading-relaxed">
+              <strong>Importa un PDF</strong> o un <strong>audio</strong> del lavoro da fare per il <strong>tuo cliente</strong> e ottieni:<br />
+            </p>
+            <ul className="mb-8 max-w-xl mx-auto text-lg sm:text-xl text-slate-600 leading-relaxed space-y-3 text-center md:ml-0 ml-6">
+              <li className="flex items-center gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span>Il <strong>Preventivo</strong> da offrirgli</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                <span><strong>Piano d'azione</strong></span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                <span><strong>Tasks</strong></span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span><strong>Budget</strong></span>
+              </li>
+            </ul>
             <p className="text-lg sm:text-xl text-slate-600 mb-8 max-w-2xl leading-relaxed">
-              <strong>Importa un PDF</strong> del lavoro per il <strong>tuo cliente</strong> e ottieni: il <strong>preventivo</strong> da offrirgli, <strong>piano d'azione, tasks e budget.</strong><br /><br />Mantieni il controllo di tutte le <strong>tue attività</strong> in un <strong>unico posto</strong> dove tutto avviene in maniera <strong>automatica!</strong>
+              Mantieni il controllo di tutte le <strong>tue attività</strong> in un <strong>unico posto</strong> dove tutto avviene in maniera <strong>automatica!</strong>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Button

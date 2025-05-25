@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import ProjectCard from "./ProjectCard"
 import CreateProjectModal from "./CreateProjectModal"
-import StatsCard from "../shared/StatsCard"
+import StatsCard from "@/components/shared/StatsCard"
 import GoalsSection from "./GoalsSection"
 import { Plus, TrendingUp, Target, Calculator, Briefcase, Zap } from "lucide-react"
 import { useConfetti } from "@/hooks/useConfetti"
-import { Progress } from "@/components/ui/progress"
 import AIFeatureIndicator from "@/components/ui/AIFeatureIndicator"
 
 interface Project {
