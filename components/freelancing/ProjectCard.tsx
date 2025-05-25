@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { ChevronDown, ChevronUp, Trash2, CheckCircle, Circle, Edit2, Plus, Check, X, CheckCheck } from "lucide-react"
+import { ChevronDown, ChevronUp, Trash2, CheckCircle, Circle, Edit2, Plus, Check, X, CheckCheck, Clock, Euro, PanelTopClose, PanelTopOpen, Download } from "lucide-react"
 import { useConfetti } from "@/hooks/useConfetti"
 
 interface Task {
@@ -15,6 +15,7 @@ interface Task {
   name: string
   price: number
   completed: boolean
+  hours: number
 }
 
 interface Project {
@@ -34,7 +35,7 @@ interface ProjectCardProps {
   onComplete: () => void
   onUpdateProject: (updates: Partial<Project>) => void
   onUpdateTask: (taskId: string, updates: Partial<Task>) => void
-  onAddTask: (newTask: Omit<Task, "id">) => void
+  onAddTask: (newTask: Omit<Task, "id" | "completed"> & { hours: number }) => void
   onDeleteTask: (taskId: string) => void
   onDeleteProject: () => void
 }
@@ -48,14 +49,15 @@ export default function ProjectCard({
   onDeleteTask,
   onDeleteProject,
 }: ProjectCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [editingTitle, setEditingTitle] = useState(false)
   const [editingTask, setEditingTask] = useState<string | null>(null)
   const [tempTitle, setTempTitle] = useState(project.title)
   const [tempClient, setTempClient] = useState(project.client)
-  const [newTask, setNewTask] = useState({ name: "", price: "" })
+  const [newTask, setNewTask] = useState({ name: "", price: "", hours: "" })
   const [showAddTask, setShowAddTask] = useState(false)
   const [previousProgress, setPreviousProgress] = useState(0)
+  const [showDetailsForCompleted, setShowDetailsForCompleted] = useState(true)
 
   const { triggerProjectCompletion } = useConfetti()
 
@@ -83,7 +85,7 @@ export default function ProjectCard({
       setTimeout(() => {
         triggerProjectCompletion()
       }, 500) // Piccolo delay per l'animazione
-      
+
       // Aggiorna lo status se non è già completato
       if (project.status !== "completed") {
         onUpdateProject({ status: "completed" })
@@ -119,24 +121,26 @@ export default function ProjectCard({
     setEditingTitle(false)
   }
 
-  const handleTaskEdit = (taskId: string, field: "name" | "price", value: string) => {
+  const handleTaskEdit = (taskId: string, field: "name" | "price" | "hours", value: string) => {
     const updates: Partial<Task> = {}
     if (field === "name") {
       updates.name = value
     } else if (field === "price") {
       updates.price = Number.parseFloat(value) || 0
+    } else if (field === "hours") {
+      updates.hours = Number.parseFloat(value) || 0
     }
     onUpdateTask(taskId, updates)
   }
 
   const handleAddTask = () => {
-    if (newTask.name && newTask.price) {
+    if (newTask.name && newTask.price && newTask.hours) {
       onAddTask({
         name: newTask.name,
         price: Number.parseFloat(newTask.price),
-        completed: false,
+        hours: Number.parseFloat(newTask.hours),
       })
-      setNewTask({ name: "", price: "" })
+      setNewTask({ name: "", price: "", hours: "" })
       setShowAddTask(false)
     }
   }
@@ -160,12 +164,14 @@ export default function ProjectCard({
     setIsExpanded(!isExpanded);
   }
 
+  // Determina se mostrare i task e la sezione footer
+  const shouldShowFullDetails = !isCompleted || (isCompleted && showDetailsForCompleted);
+
   return (
     <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="group">
       <Card
-        className={`overflow-hidden border-2 transition-all duration-300 hover:shadow-lg ${
-          isCompleted ? "border-gray-200 opacity-90 hover:border-gray-300" : "border-blue-200 hover:border-blue-300"
-        }`}
+        className={`overflow-hidden border-2 transition-all duration-300 hover:shadow-lg ${isCompleted ? "border-gray-200 opacity-90 hover:border-gray-300" : "border-blue-200 hover:border-blue-300"
+          }`}
       >
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
@@ -217,15 +223,37 @@ export default function ProjectCard({
             </div>
 
             <div className="flex items-center space-x-2">
+              {isCompleted && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDetailsForCompleted(!showDetailsForCompleted)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  title={showDetailsForCompleted ? "Comprimi dettagli completati" : "Mostra dettagli completati"}
+                >
+                  {showDetailsForCompleted ? <PanelTopClose className="w-4 h-4" /> : <PanelTopOpen className="w-4 h-4" />}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleMainToggleClick}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                title={isExpanded ? "Nascondi task" : "Mostra task"}
+                onClick={() => console.log("Download action plan for project: ", project.id)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500 hover:text-blue-700"
+                title="Scarica Piano d'Azione (AI)"
               >
-                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                <Download className="w-4 h-4" />
               </Button>
+              {(!isCompleted || showDetailsForCompleted) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleMainToggleClick}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  title={isExpanded ? "Nascondi task" : "Mostra task"}
+                >
+                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -241,22 +269,22 @@ export default function ProjectCard({
           <div className="mt-4 p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg border border-blue-100">
             <div className="flex items-center justify-between mb-3">
               <div className="grid grid-cols-3 gap-4 flex-1">
-              <div className="text-center">
-                <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">BUDGET</p>
-                <p className="font-bold text-blue-700">€{stats.totalBudget}</p>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">BUDGET</p>
+                  <p className="font-bold text-blue-700">€{stats.totalBudget}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">PROGRESS</p>
+                  <p className="font-bold text-blue-700">
+                    {stats.completedTasks}/{stats.totalTasks}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">COMPLETION</p>
+                  <p className="font-bold text-blue-700">{Math.round(stats.progressPercentage)}%</p>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">PROGRESS</p>
-                <p className="font-bold text-blue-700">
-                  {stats.completedTasks}/{stats.totalTasks}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">COMPLETION</p>
-                <p className="font-bold text-blue-700">{Math.round(stats.progressPercentage)}%</p>
-              </div>
-              </div>
-              
+
               {/* Pulsante Completa Tutto - visibile solo se ci sono task non completati */}
               {stats.progressPercentage < 100 && stats.totalTasks > 0 && (
                 <motion.div
@@ -283,7 +311,7 @@ export default function ProjectCard({
         </CardHeader>
 
         <AnimatePresence>
-          {isExpanded && (
+          {isExpanded && shouldShowFullDetails && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
@@ -297,11 +325,10 @@ export default function ProjectCard({
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all duration-200 ${
-                      task.completed
-                        ? "bg-green-50 border-green-200"
-                        : "bg-gray-50 border-gray-200 hover:border-blue-200"
-                    } ${editingTask !== task.id ? "cursor-pointer hover:shadow-md" : ""}`}
+                    className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all duration-200 ${task.completed
+                      ? "bg-green-50 border-green-200"
+                      : "bg-gray-50 border-gray-200 hover:border-blue-200"
+                      } ${editingTask !== task.id ? "cursor-pointer hover:shadow-md" : ""}`}
                     onClick={() => {
                       if (editingTask !== task.id) {
                         toggleTask(task.id)
@@ -324,12 +351,26 @@ export default function ProjectCard({
                             onChange={(e) => handleTaskEdit(task.id, "name", e.target.value)}
                             className="flex-1"
                           />
-                          <Input
-                            type="number"
-                            value={task.price}
-                            onChange={(e) => handleTaskEdit(task.id, "price", e.target.value)}
-                            className="w-20"
-                          />
+                          <div className="relative">
+                            <Clock className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <Input
+                              type="number"
+                              value={task.hours}
+                              onChange={(e) => handleTaskEdit(task.id, "hours", e.target.value)}
+                              className="w-20 pl-7"
+                              placeholder="Ore"
+                              min="0"
+                            />
+                          </div>
+                          <div className="relative">
+                            <Euro className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <Input
+                              type="number"
+                              value={task.price}
+                              onChange={(e) => handleTaskEdit(task.id, "price", e.target.value)}
+                              className="w-20 pl-7"
+                            />
+                          </div>
                           <Button
                             size="sm"
                             onClick={() => setEditingTask(null)}
@@ -341,8 +382,15 @@ export default function ProjectCard({
                       ) : (
                         <div className="flex items-center justify-between flex-1">
                           <span className={task.completed ? "line-through text-gray-500" : ""}>{task.name}</span>
-                          <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-                            <span className="font-semibold">€{task.price}</span>
+                          <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center text-xs text-gray-500">
+                              <Clock size={14} className="mr-1" />
+                              {task.hours}h
+                            </div>
+                            <div className="flex items-center font-semibold">
+                              <Euro size={14} className="mr-1 text-gray-500" />
+                              {task.price}
+                            </div>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -380,13 +428,28 @@ export default function ProjectCard({
                       onChange={(e) => setNewTask((prev) => ({ ...prev, name: e.target.value }))}
                       className="flex-1"
                     />
-                    <Input
-                      type="number"
-                      placeholder="Prezzo"
-                      value={newTask.price}
-                      onChange={(e) => setNewTask((prev) => ({ ...prev, price: e.target.value }))}
-                      className="w-24"
-                    />
+                    <div className="relative">
+                      <Clock className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <Input
+                        type="number"
+                        placeholder="Ore"
+                        value={newTask.hours}
+                        onChange={(e) => setNewTask((prev) => ({ ...prev, hours: e.target.value }))}
+                        className="w-24 pl-7"
+                        min="0"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Euro className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <Input
+                        type="number"
+                        placeholder="Prezzo"
+                        value={newTask.price}
+                        onChange={(e) => setNewTask((prev) => ({ ...prev, price: e.target.value }))}
+                        className="w-24 pl-7"
+                        min="0"
+                      />
+                    </div>
                     <Button size="sm" onClick={handleAddTask} className="bg-blue-500 hover:bg-blue-600">
                       <Check className="w-3 h-3" />
                     </Button>
@@ -410,26 +473,27 @@ export default function ProjectCard({
           )}
         </AnimatePresence>
 
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div
-              className={`p-3 rounded-lg border ${
-                isCompleted
+        {shouldShowFullDetails && (
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div
+                className={`p-3 rounded-lg border ${isCompleted
                   ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
                   : "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
-              }`}
-            >
-              <p className="text-xs text-gray-600 font-medium mb-1">Guadagnato</p>
-              <p className={`text-xl font-bold ${isCompleted ? "text-green-700" : "text-blue-700"}`}>
-                €{stats.earnedAmount}
-              </p>
+                  }`}
+              >
+                <p className="text-xs text-gray-600 font-medium mb-1">Guadagnato</p>
+                <p className={`text-xl font-bold ${isCompleted ? "text-green-700" : "text-blue-700"}`}>
+                  €{stats.earnedAmount}
+                </p>
+              </div>
+              <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-3 rounded-lg border border-gray-200">
+                <p className="text-xs text-gray-600 font-medium mb-1">Rimanente</p>
+                <p className="text-xl font-bold text-gray-700">€{stats.totalBudget - stats.earnedAmount}</p>
+              </div>
             </div>
-            <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-3 rounded-lg border border-gray-200">
-              <p className="text-xs text-gray-600 font-medium mb-1">Rimanente</p>
-              <p className="text-xl font-bold text-gray-700">€{stats.totalBudget - stats.earnedAmount}</p>
-            </div>
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
     </motion.div>
   )

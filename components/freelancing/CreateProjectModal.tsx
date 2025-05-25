@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, X, Upload, Sparkles, Euro, Mic, ClipboardPaste, FileUp, FileAudio, Send } from "lucide-react"
+import { Plus, X, Upload, Sparkles, Euro, Mic, ClipboardPaste, FileUp, FileAudio, Send, Clock } from "lucide-react"
 
 interface Task {
   id: string
   name: string
   price: number
+  hours: number
 }
 
 interface CreateProjectModalProps {
@@ -31,12 +32,12 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
   const [budgetInputValue, setBudgetInputValue] = useState<string>(Math.round(totalBudget).toString())
   
   const defaultTasks: Task[] = [
-    { id: "1", name: "Pianificazione iniziale", price: 150 },
-    { id: "2", name: "Sviluppo principale", price: 150 },
+    { id: "1", name: "Pianificazione iniziale", price: 150, hours: 5 },
+    { id: "2", name: "Sviluppo principale", price: 150, hours: 10 },
   ].map(task => ({ ...task, price: Math.round(task.price) }));
   
   const [tasks, setTasks] = useState<Task[]>(defaultTasks)
-  const [newTask, setNewTask] = useState({ name: "", price: "" }) // price è stringa per input
+  const [newTask, setNewTask] = useState({ name: "", price: "", hours: "" }) // price e hours sono stringhe per input
 
   // Stati per la sezione AI
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -126,10 +127,12 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
   const addTask = () => {
     if (newTask.name) {
       const newTaskPrice = newTask.price ? Math.round(Number.parseFloat(newTask.price)) : 0;
+      const newTaskHours = newTask.hours ? Math.round(Number.parseFloat(newTask.hours)) : 0;
       const newTaskObj: Task = {
         id: Date.now().toString(),
         name: newTask.name,
         price: newTaskPrice,
+        hours: newTaskHours,
       };
       
       let currentTotalBudget = Math.round(totalBudget);
@@ -147,7 +150,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
       setTotalBudget(currentTotalBudget); // Aggiorna totalBudget
       setBudgetInputValue(currentTotalBudget.toString()); // E il suo input field
       updateTotalFromTasks(updatedTasksList); // Chiamata finale per coerenza
-      setNewTask({ name: "", price: "" });
+      setNewTask({ name: "", price: "", hours: "" });
     }
   }
 
@@ -259,7 +262,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
     const finalBudget = Math.round(totalBudget);
     const finalTasks = tasks.map(task => ({
       ...task,
-      price: Math.round(task.price)
+      price: Math.round(task.price),
+      hours: Math.round(task.hours)
     }));
 
     // Verifica coerenza finale: la somma dei task deve eguagliare il budget finale
@@ -286,7 +290,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
     setBudgetInputValue(defaultResetBudget.toString());
     const resetTasksArray = defaultTasks.map(t => ({...t})); // Crea una nuova copia per il reset
     setTasks(redistributeTasks(defaultResetBudget, resetTasksArray));
-    setNewTask({ name: "", price: "" });
+    setNewTask({ name: "", price: "", hours: "" });
   }
 
   // Handler per upload PDF
@@ -359,8 +363,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
         description: "Questa è una descrizione generata automaticamente dall\'AI.",
         budget: 550,
         tasks: [
-          { id: "ai-task-1", name: "Task AI 1 - Analisi", price: 200 },
-          { id: "ai-task-2", name: "Task AI 2 - Sviluppo Iniziale", price: 350 },
+          { id: "ai-task-1", name: "Task AI 1 - Analisi", price: 200, hours: 8 },
+          { id: "ai-task-2", name: "Task AI 2 - Sviluppo Iniziale", price: 350, hours: 15 },
         ]
       };
       // ***** FINE SIMULAZIONE *****
@@ -374,7 +378,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
       const roundedBudget = Math.round(mockAIData.budget);
       setTotalBudget(roundedBudget);
       setBudgetInputValue(roundedBudget.toString());
-      setTasks(mockAIData.tasks.map(t => ({...t, price: Math.round(t.price)})));
+      setTasks(mockAIData.tasks.map(t => ({...t, price: Math.round(t.price), hours: Math.round(t.hours || 0) })));
 
       // 3. Opzionale: resetta gli input AI dopo l'elaborazione
       // setPdfFile(null);
@@ -417,7 +421,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
         setBudgetInputValue(defaultResetBudget.toString());
         const resetTasksArray = defaultTasks.map(t => ({...t}));
         setTasks(redistributeTasks(defaultResetBudget, resetTasksArray));
-        setNewTask({ name: "", price: "" });
+        setNewTask({ name: "", price: "", hours: "" });
       } else {
         // Logica di apertura già gestita da useEffect [isOpen]
       }
@@ -639,19 +643,31 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
                 <div>
                   <Label>Task del Progetto</Label>
                   <p className="text-xs text-gray-500 mt-1">
-                    Task predefiniti inclusi • Modificabili • Aggiungi altri se necessario
+                    Task predefiniti inclusi • Modificabili • Aggiungi altri se necessario • Specifica ore e prezzo per ogni task
                   </p>
                 </div>
               </div>
 
               {/* Add Task Form */}
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-2 mb-4 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-2 mb-4 items-center">
                 <Input
-                  placeholder="Nome nuovo task"
+                  placeholder="Task"
                   value={newTask.name}
                   onChange={(e) => setNewTask((prev) => ({ ...prev, name: formatToCapitalized(e.target.value) }))}
                   className="md:col-span-1"
                 />
+                <div className="relative md:col-span-1">
+                  <Clock className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <Input
+                    type="number"
+                    placeholder="Ore stimate"
+                    value={newTask.hours}
+                    onChange={(e) => setNewTask((prev) => ({ ...prev, hours: e.target.value }))}
+                    step="1"
+                    min="0"
+                    className="pl-7"
+                  />
+                </div>
                 <div className="relative md:col-span-1">
                   <Euro className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                   <Input
@@ -660,6 +676,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
                     value={newTask.price}
                     onChange={(e) => setNewTask((prev) => ({ ...prev, price: e.target.value }))}
                     step="1"
+                    min="0"
                     className="pl-7"
                   />
                 </div>
@@ -686,15 +703,20 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border overflow-hidden mb-2"
                   >
                     <span className="flex-1 truncate pr-2">{task.name}</span>
-                    <div className="flex items-center space-x-2 flex-shrink-0">
-                      <div className="flex items-center space-x-1">
-                        <Euro className="w-3 h-3 text-gray-400" />
+                    <div className="flex items-center space-x-3 flex-shrink-0">
+                      <div className="flex items-center space-x-1 text-xs text-gray-500">
+                        <Clock size={14} className="mr-0.5" />
+                        <span>{task.hours}h</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Euro size={14} className="text-gray-400 mr-1" />
                         <Input
                           type="number"
                           value={task.price}
                           onChange={(e) => updateTaskPrice(task.id, e.target.value)}
-                          className="w-28 h-8 text-sm font-semibold text-blue-600 border-blue-200"
+                          className="w-24 h-8 text-sm font-semibold text-blue-600 border-blue-200"
                           step="1"
+                          min="0"
                         />
                       </div>
                       <Button
