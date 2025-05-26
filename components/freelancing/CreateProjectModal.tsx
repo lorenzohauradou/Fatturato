@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, X, Upload, Sparkles, Euro, Mic, ClipboardPaste, FileUp, FileAudio, Send, Clock } from "lucide-react"
+import { Plus, X, Upload, Sparkles, Euro, Mic, ClipboardPaste, FileUp, FileAudio, Send, Clock, Target, DollarSign, ClipboardList, ListChecks, Briefcase, Landmark, FileText, CheckSquare } from "lucide-react"
+import Image from "next/image"
 
 interface Task {
   id: string
@@ -231,6 +232,16 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
     }
   };
 
+  // Funzione per aggiornare le ore di un task esistente
+  const updateTaskHours = (taskId: string, newHoursString: string) => {
+    const newHours = Math.max(0, Math.round(Number.parseFloat(newHoursString) || 0)); // Assicura >= 0 e intero
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, hours: newHours } : task
+      )
+    );
+    // Nota: l'aggiornamento delle ore non influisce sulla ridistribuzione del budget totale.
+  }
 
   const handleSubmit = () => {
     if (hasAiInput) {
@@ -426,11 +437,17 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
         // Logica di apertura già gestita da useEffect [isOpen]
       }
     }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm p-4 sm:p-6 border-b flex flex-row justify-between items-center">
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 bg-gray-50">
+        <DialogHeader className="sticky top-0 z-20 bg-white/90 backdrop-blur-sm p-4 sm:p-6 border-b flex flex-row justify-between items-center">
           <DialogTitle className="flex items-center space-x-2">
-            <img src="/online-analytical.png" alt="Nuovo Progetto Icona" className="w-6 h-6 sm:w-7 sm:h-7 mr-2" />
-            <span className="text-base sm:text-lg">{formData.title ? formData.title : "Nuovo Progetto"}</span>
+            <Image
+              src="/online-analytical.png"
+              alt="Nuovo Progetto Icona"
+              width={24}
+              height={24}
+              className="mr-2"
+            />
+            <span className="text-lg font-semibold text-gray-800">{formData.title ? `${formData.title}` : "Nuovo Progetto"}</span>
           </DialogTitle>
           <div className="flex space-x-2 sm:space-x-3 items-center">
             {/* Pulsante Annulla completo per schermi sm e superiori */}
@@ -576,39 +593,47 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white px-2 text-sm text-gray-500">oppure procedi manualmente</span>
+              <span className="bg-gray-50 px-2 text-sm text-gray-500">oppure procedi manualmente</span>
             </div>
           </div>
 
           {/* Manual Form */}
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
               <div>
-                <Label htmlFor="title">Titolo Progetto</Label>
+                <Label htmlFor="title" className="flex items-center text-sm font-medium text-gray-700 mb-1">
+                  <Target className="w-4 h-4 mr-2 text-gray-500" />
+                  Titolo Progetto
+                </Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData((prev) => ({ ...prev, title: formatToCapitalized(e.target.value) }))}
-                  placeholder="Nome del progetto"
+                  placeholder="Es: Landing Page E-commerce"
+                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
               <div>
-                <Label htmlFor="client">Cliente</Label>
+                <Label htmlFor="client" className="flex items-center text-sm font-medium text-gray-700 mb-1">
+                  <Briefcase className="w-4 h-4 mr-2 text-gray-500" />
+                  Cliente
+                </Label>
                 <Input
                   id="client"
                   value={formData.client}
                   onChange={(e) => setFormData((prev) => ({ ...prev, client: formatToCapitalized(e.target.value) }))}
-                  placeholder="Nome del cliente"
+                  placeholder="Es: Rossi S.R.L."
+                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
 
             {/* Budget Generale */}
             <div>
-              <Label htmlFor="budget" className="flex items-center space-x-2">
-                <Euro className="w-4 h-4" />
-                <span>Budget Totale Progetto</span>
-                <span className="text-red-500">*</span>
+              <Label htmlFor="budget" className="flex items-center text-sm font-medium text-gray-700 mb-1">
+                <DollarSign className="w-4 h-4 mr-2 text-gray-500" />
+                Pagamento Cliente (€)
+                <span className="text-red-500 ml-1">*</span>
               </Label>
               <Input
                 id="budget"
@@ -619,7 +644,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
                 placeholder="300"
                 min="0"
                 step="1"
-                className="text-lg font-semibold text-green-600 border-green-200 focus:border-green-400 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Il budget sarà distribuito automaticamente tra i task se valido.
@@ -627,110 +652,125 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
             </div>
 
             <div>
-              <Label htmlFor="description">Descrizione</Label>
+              <Label htmlFor="description" className="flex items-center text-sm font-medium text-gray-700 mb-1">
+                <FileText className="w-4 h-4 mr-2 text-gray-500" />
+                Descrizione
+              </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: formatToCapitalized(e.target.value) }))}
-                placeholder="Descrizione del progetto"
+                placeholder="Breve descrizione del progetto e degli obiettivi..."
                 rows={3}
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
 
             {/* Tasks Section */}
-            <div>
+            <div className="pt-2">
               <div className="flex items-center justify-between mb-3">
-                <div>
-                  <Label>Task del Progetto</Label>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Task predefiniti inclusi • Modificabili • Aggiungi altri se necessario • Specifica ore e prezzo per ogni task
-                  </p>
-                </div>
+                <Label className="flex items-center text-sm font-medium text-gray-700">
+                  <ListChecks className="w-4 h-4 mr-2 text-gray-500" />
+                  Task del Progetto
+                </Label>
               </div>
 
-              {/* Add Task Form */}
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-2 mb-4 items-center">
-                <Input
-                  placeholder="Task"
-                  value={newTask.name}
-                  onChange={(e) => setNewTask((prev) => ({ ...prev, name: formatToCapitalized(e.target.value) }))}
-                  className="md:col-span-1"
-                />
-                <div className="relative md:col-span-1">
-                  <Clock className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                  <Input
-                    type="number"
-                    placeholder="Ore stimate"
-                    value={newTask.hours}
-                    onChange={(e) => setNewTask((prev) => ({ ...prev, hours: e.target.value }))}
-                    step="1"
-                    min="0"
-                    className="pl-7"
-                  />
-                </div>
-                <div className="relative md:col-span-1">
-                  <Euro className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                  <Input
-                    type="number"
-                    placeholder="Prezzo (opzionale)"
-                    value={newTask.price}
-                    onChange={(e) => setNewTask((prev) => ({ ...prev, price: e.target.value }))}
-                    step="1"
-                    min="0"
-                    className="pl-7"
-                  />
-                </div>
-                <Button
-                  onClick={addTask}
-                  className="md:col-span-1 border border-blue-500 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:border-blue-600 flex items-center justify-center space-x-2 w-full py-2.5 rounded-md transition-colors duration-150"
-                  type="button"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Aggiungi Task</span>
-                </Button>
-              </div>
-
-              {/* Tasks List */}
-              <AnimatePresence>
+              <div className="space-y-3 mb-4">
                 {tasks.map((task, index) => (
                   <motion.div
                     key={task.id}
                     layout
-                    initial={{ opacity: 0, height: 0, y: 10 }}
-                    animate={{ opacity: 1, height: 'auto', y: 0 }}
-                    exit={{ opacity: 0, height: 0, x: -20 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
                     transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border overflow-hidden mb-2"
+                    className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 shadow-sm"
                   >
-                    <span className="flex-1 truncate pr-2">{task.name}</span>
+                    <div className="flex-1 flex items-center space-x-3">
+                      <Input
+                        value={task.name}
+                        readOnly
+                        className="flex-1 text-sm border-none focus:ring-0 p-0 bg-transparent"
+                      />
+                    </div>
                     <div className="flex items-center space-x-3 flex-shrink-0">
-                      <div className="flex items-center space-x-1 text-xs text-gray-500">
-                        <Clock size={14} className="mr-0.5" />
-                        <span>{task.hours}h</span>
+                      <div className="relative w-24">
+                        <Clock size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <Input
+                          type="number"
+                          value={task.hours}
+                          onChange={(e) => updateTaskHours(task.id, e.target.value)}
+                          className="w-full h-8 text-sm text-center pl-6 pr-2 border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                          min="0"
+                          step="1"
+                        />
                       </div>
-                      <div className="flex items-center">
-                        <Euro size={14} className="text-gray-400 mr-1" />
+                      <div className="relative w-24">
+                        <Euro size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
                         <Input
                           type="number"
                           value={task.price}
                           onChange={(e) => updateTaskPrice(task.id, e.target.value)}
-                          className="w-24 h-8 text-sm font-semibold text-blue-600 border-blue-200"
+                          className="w-full h-8 text-sm text-center pl-6 pr-2 border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                           step="1"
                           min="0"
                         />
                       </div>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={() => removeTask(task.id)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:bg-red-100 hover:text-red-700 p-1 rounded-full"
                       >
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
                   </motion.div>
                 ))}
-              </AnimatePresence>
+              </div>
+
+              <div className="mt-3 flex items-center border border-dashed border-blue-400 rounded-md hover:border-blue-500 transition-colors">
+                <Input
+                  placeholder="Nuovo Task (es: Design UI)"
+                  value={newTask.name}
+                  onChange={(e) => setNewTask((prev) => ({ ...prev, name: formatToCapitalized(e.target.value) }))}
+                  className="flex-1 border-none focus:ring-0 text-sm h-10 px-3"
+                />
+                <div className="relative">
+                  <Clock size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <Input
+                    type="number"
+                    placeholder="Ore"
+                    value={newTask.hours}
+                    onChange={(e) => setNewTask((prev) => ({ ...prev, hours: e.target.value }))}
+                    step="1"
+                    min="0"
+                    className="w-20 text-sm border-none focus:ring-0 h-10 pl-7 pr-2 text-center"
+                  />
+                </div>
+                <div className="relative">
+                  <Euro size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <Input
+                    type="number"
+                    placeholder="€"
+                    value={newTask.price}
+                    onChange={(e) => setNewTask((prev) => ({ ...prev, price: e.target.value }))}
+                    step="1"
+                    min="0"
+                    className="w-20 text-sm border-none focus:ring-0 h-10 px-2 text-center"
+                  />
+                </div>
+                <Button
+                  onClick={addTask}
+                  variant="ghost"
+                  size="icon"
+                  className="text-blue-600 hover:bg-blue-100 rounded-full m-1"
+                  type="button"
+                  disabled={!newTask.name}
+                >
+                  <Plus className="w-5 h-5" />
+                </Button>
+              </div>
 
               {tasks.length > 0 && (
                 <motion.div

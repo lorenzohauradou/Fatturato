@@ -58,6 +58,7 @@ export default function ProjectCard({
   const [showAddTask, setShowAddTask] = useState(false)
   const [previousProgress, setPreviousProgress] = useState(0)
   const [showDetailsForCompleted, setShowDetailsForCompleted] = useState(true)
+  const [showEarnings, setShowEarnings] = useState(true)
 
   const { triggerProjectCompletion } = useConfetti()
 
@@ -78,7 +79,7 @@ export default function ProjectCard({
     }
   }, [project.tasks])
 
-  // Effetto per attivare confetti quando il progetto si completa
+  // Effetto per attivare confetti quando il progetto si completa e per aggiornare lo stato
   useEffect(() => {
     if (stats.progressPercentage === 100 && previousProgress < 100) {
       // Progetto appena completato!
@@ -90,9 +91,13 @@ export default function ProjectCard({
       if (project.status !== "completed") {
         onUpdateProject({ status: "completed" })
       }
+    } else if (stats.progressPercentage < 100 && project.status === "completed") {
+      // Progetto era completato, ma ora un task è stato deselezionato.
+      // Riporta lo stato a "active" (o un altro stato appropriato per "in corso")
+      onUpdateProject({ status: "active" })
     }
     setPreviousProgress(stats.progressPercentage)
-  }, [stats.progressPercentage, previousProgress, triggerProjectCompletion, onUpdateProject, project.status])
+  }, [stats.progressPercentage, previousProgress, project.status, triggerProjectCompletion, onUpdateProject])
 
   const toggleTask = (taskId: string) => {
     const task = project.tasks.find((t) => t.id === taskId)
@@ -174,7 +179,9 @@ export default function ProjectCard({
   return (
     <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="group">
       <Card
-        className={`overflow-hidden border-2 transition-all duration-300 hover:shadow-lg ${isCompleted ? "border-gray-200 opacity-90 hover:border-gray-300" : "border-blue-200 hover:border-blue-300"
+        className={`overflow-hidden border transition-all duration-300 hover:shadow-lg rounded-xl shadow-sm ${isCompleted
+          ? "bg-white border-gray-200 hover:border-gray-300"
+          : "bg-blue-50 border-blue-200 hover:border-blue-300"
           }`}
       >
         <CardHeader className="pb-4">
@@ -315,7 +322,10 @@ export default function ProjectCard({
             </div>
 
             <div className="mt-3">
-              <Progress value={stats.progressPercentage} className="h-3" />
+              <Progress
+                value={stats.progressPercentage}
+                className="h-2.5 rounded-full [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-purple-600"
+              />
             </div>
           </div>
         </CardHeader>
@@ -335,10 +345,11 @@ export default function ProjectCard({
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all duration-200 ${task.completed
-                      ? "bg-green-50 border-green-200"
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 shadow-xs ${task.completed
+                      ? "bg-white border-gray-200"
                       : "bg-gray-50 border-gray-200 hover:border-blue-200"
-                      } ${editingTask !== task.id ? "cursor-pointer hover:shadow-md" : ""}`}
+                      } ${editingTask !== task.id && !isCompleted ? "cursor-pointer hover:shadow-md" : ""} ${isCompleted && task.completed ? "opacity-80" : ""}`
+                    }
                     onClick={() => {
                       if (editingTask !== task.id) {
                         toggleTask(task.id)
@@ -348,7 +359,7 @@ export default function ProjectCard({
                     <div className="flex items-center space-x-3 flex-1">
                       <div className="p-0 h-auto">
                         {task.completed ? (
-                          <CheckCircle className="w-5 h-5 text-green-500" />
+                          <CheckCircle className="w-5 h-5 text-emerald-500" />
                         ) : (
                           <Circle className="w-5 h-5 text-gray-400" />
                         )}
@@ -391,29 +402,33 @@ export default function ProjectCard({
                         </div>
                       ) : (
                         <div className="flex items-center justify-between flex-1">
-                          <span className={task.completed ? "line-through text-gray-500" : ""}>{task.name}</span>
-                          <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center text-xs text-gray-500">
-                              <Clock size={14} className="mr-1" />
-                              {task.hours}h
-                            </div>
-                            <div className="flex items-center font-semibold">
-                              <Euro size={14} className="mr-1 text-gray-500" />
-                              {task.price}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingTask(task.id)}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </Button>
+                          <span className={`${task.completed ? "line-through text-gray-500" : "text-gray-800"} ${isCompleted && task.completed ? "font-normal" : "font-medium"}`}>{task.name}</span>
+                          <div className={`flex items-center space-x-3 ${isCompleted ? "opacity-0 group-hover:opacity-100" : ""}`} onClick={(e) => e.stopPropagation()}>
+                            {!isCompleted && (
+                              <>
+                                <div className="flex items-center text-xs text-gray-500">
+                                  <Clock size={14} className="mr-1" />
+                                  {task.hours}h
+                                </div>
+                                <div className="flex items-center font-semibold">
+                                  <Euro size={14} className="mr-1 text-gray-500" />
+                                  {task.price}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingTask(task.id)}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                </Button>
+                              </>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => onDeleteTask(task.id)}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 p-1"
+                              className={`transition-opacity text-red-500 hover:text-red-700 p-1 ${isCompleted ? "opacity-50 hover:opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
@@ -485,23 +500,55 @@ export default function ProjectCard({
 
         {shouldShowFullDetails && (
           <CardContent className="pt-0">
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div
-                className={`p-3 rounded-lg border ${isCompleted
-                  ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
-                  : "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
-                  }`}
-              >
-                <p className="text-xs text-gray-600 font-medium mb-1">Guadagnato</p>
-                <p className={`text-xl font-bold ${isCompleted ? "text-green-700" : "text-blue-700"}`}>
-                  €{stats.earnedAmount}
-                </p>
+            {showEarnings ? (
+              <div className="relative">
+                <div className={`grid grid-cols-2 gap-4 mt-4 ${isCompleted ? "p-3 bg-slate-50 rounded-lg" : ""}`}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowEarnings(false)}
+                    className="absolute -top-1 -right-1 opacity-50 hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3 text-gray-500" />
+                  </Button>
+                  <div
+                    className={`p-4 rounded-lg border ${isCompleted
+                      ? "bg-emerald-50 border-emerald-200 text-center"
+                      : "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
+                      }`}
+                  >
+                    <p className={`text-xs font-medium mb-1 ${isCompleted ? "text-emerald-700 uppercase tracking-wider" : "text-gray-600"}`}>Guadagnato</p>
+                    <p className={`text-xl font-bold ${isCompleted ? "text-emerald-600" : "text-blue-700"}`}>
+                      €{stats.earnedAmount}
+                    </p>
+                  </div>
+                  <div
+                    className={`p-4 rounded-lg border ${isCompleted
+                      ? "bg-white border-gray-200 text-center"
+                      : "bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200"}`}
+                  >
+                    <p className={`text-xs font-medium mb-1 ${isCompleted ? "text-gray-600 uppercase tracking-wider" : "text-gray-600"}`}>
+                      {isCompleted ? "Completato!" : "Rimanente"}
+                    </p>
+                    <p className={`text-xl font-bold ${isCompleted ? "text-gray-700" : "text-gray-700"}`}>
+                      €{isCompleted ? 0 : stats.totalBudget - stats.earnedAmount}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-3 rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-600 font-medium mb-1">Rimanente</p>
-                <p className="text-xl font-bold text-gray-700">€{stats.totalBudget - stats.earnedAmount}</p>
+            ) : (
+              <div className="flex justify-end mt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowEarnings(true)}
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  <Euro className="w-3.5 h-3.5 mr-1.5" />
+                  <span className="text-sm">Mostra statistiche</span>
+                </Button>
               </div>
-            </div>
+            )}
           </CardContent>
         )}
       </Card>
