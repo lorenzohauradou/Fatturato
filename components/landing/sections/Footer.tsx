@@ -59,7 +59,7 @@ const Footer: React.FC<FooterProps> = ({ scrollToSection }) => {
               <div className="w-10 h-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-md">
                 <Image src="/online-analytical.png" alt="EBITDA Dashboard Logo" width={28} height={28} className="sm:w-7 sm:h-7" />
               </div>
-              <span className="font-bold text-lg text-white">EBITDA Dashboard</span>
+              <span className="font-bold text-lg text-white">Fatturato AI</span>
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
               Il tool AI per freelancer e agenzie che vogliono massimizzare la profittabilità di ogni progetto.
@@ -77,9 +77,8 @@ const Footer: React.FC<FooterProps> = ({ scrollToSection }) => {
                       // href={link.href} // Se fosse un <a> tag
                       // target={link.href ? "_blank" : undefined}
                       // rel={link.href ? "noopener noreferrer" : undefined}
-                      className={`hover:text-blue-400 transition-colors ${
-                        link.disabled ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`hover:text-blue-400 transition-colors ${link.disabled ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       disabled={link.disabled}
                     >
                       {link.label}
@@ -93,7 +92,7 @@ const Footer: React.FC<FooterProps> = ({ scrollToSection }) => {
 
         <div className="border-t border-slate-700 mt-8 pt-8 text-center text-sm">
           <p>
-            &copy; {new Date().getFullYear()} EBITDA Dashboard. Tutti i diritti riservati. Sviluppato con ❤️ e 🧠.
+            &copy; {new Date().getFullYear()} Fatturato AI. Tutti i diritti riservati.
           </p>
         </div>
       </div>
