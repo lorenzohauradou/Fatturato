@@ -20,7 +20,7 @@ export default function HomePage() {
       >
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
-            <motion.div 
+            <motion.div
               className="flex items-center space-x-3"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -40,7 +40,7 @@ export default function HomePage() {
                 </motion.div>
               </Link>
               <div className="text-center sm:text-left">
-                <motion.h1 
+                <motion.h1
                   className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent"
                   initial={{ scale: 0.9 }}
                   animate={{ scale: 1 }}

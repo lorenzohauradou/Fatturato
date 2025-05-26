@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { ChevronDown, ChevronUp, Trash2, CheckCircle, Circle, Edit2, Plus, Check, X, CheckCheck, Clock, Euro, PanelTopClose, PanelTopOpen, Download } from "lucide-react"
+import { ChevronDown, ChevronUp, Trash2, CheckCircle, Circle, Edit2, Plus, Check, X, CheckCheck, Clock, Euro, PanelTopClose, PanelTopOpen, Download, FileText } from "lucide-react"
 import { useConfetti } from "@/hooks/useConfetti"
 
 interface Task {
@@ -145,6 +145,10 @@ export default function ProjectCard({
     }
   }
 
+  const handleRequestActionPlan = (taskId: string, taskName: string) => {
+    console.log(`Richiesta piano d'azione AI per task: "${taskName}" (ID: ${taskId})`);
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -204,7 +208,7 @@ export default function ProjectCard({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center">
                     <h3 className="font-semibold text-lg">
                       {project.title} - {project.client}
                     </h3>
@@ -216,52 +220,58 @@ export default function ProjectCard({
                     >
                       <Edit2 className="w-3 h-3" />
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRequestActionPlan(project.id, project.title)}
+                      className="opacity-0 group-hover:opacity-100 transition-all duration-300 
+                        px-4 py-2 bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 hover:text-white
+                        text-white border-none shadow-lg hover:shadow-xl transform
+                        flex items-center space-x-2 rounded-full font-medium ml-14"
+                      title="Genera Piano d'Azione con AI"
+                    >
+                      <FileText className="w-4 h-4 animate-pulse" />
+                      <span className="text-sm">Piano d'Azione AI</span>
+                    </Button>
                   </div>
                 )}
                 {getStatusBadge(project.status)}
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              {isCompleted && (
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                {isCompleted && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowDetailsForCompleted(!showDetailsForCompleted)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    title={showDetailsForCompleted ? "Comprimi dettagli completati" : "Mostra dettagli completati"}
+                  >
+                    {showDetailsForCompleted ? <PanelTopClose className="w-4 h-4" /> : <PanelTopOpen className="w-4 h-4" />}
+                  </Button>
+                )}
+                {(!isCompleted || showDetailsForCompleted) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleMainToggleClick}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    title={isExpanded ? "Nascondi task" : "Mostra task"}
+                  >
+                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowDetailsForCompleted(!showDetailsForCompleted)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  title={showDetailsForCompleted ? "Comprimi dettagli completati" : "Mostra dettagli completati"}
+                  onClick={onDeleteProject}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700"
                 >
-                  {showDetailsForCompleted ? <PanelTopClose className="w-4 h-4" /> : <PanelTopOpen className="w-4 h-4" />}
+                  <Trash2 className="w-4 h-4" />
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => console.log("Download action plan for project: ", project.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500 hover:text-blue-700"
-                title="Scarica Piano d'Azione (AI)"
-              >
-                <Download className="w-4 h-4" />
-              </Button>
-              {(!isCompleted || showDetailsForCompleted) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMainToggleClick}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  title={isExpanded ? "Nascondi task" : "Mostra task"}
-                >
-                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDeleteProject}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              </div>
             </div>
           </div>
 
